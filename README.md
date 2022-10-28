@@ -1,6 +1,6 @@
 # openAILibrary
 
-Used to access openAI completions service.
+Used to access openAI service.
 
 ## Requirement
 
