@@ -24,3 +24,40 @@ Used to access openAI completions service.
 
 ## Package dependencies
 - Alamofire
+
+## Sample code
+
+```
+import SwiftUI
+import openAILibrary
+
+struct mainUI: View {
+    @StateObject var openAIObj = openAIService()
+    private func startOpenAIService(){
+        self.openAIObj.openAIApiKey = "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"
+        self.openAIObj.request(prompt: self.openAIObj.makePrompt(data: [
+            "Correct this to standard english",
+            "She no went to the market"
+        ]))
+    }
+    var body: some View {
+        VStack{
+            switch(self.openAIObj.status){
+            case .startService:
+                Text("Start service")
+            case .receivedResponse:
+                Text("Received response")
+            case .receivedUncorruptedData:
+                Text(self.openAIObj.responseText)
+            case .receivedCorruptedData:
+                Text("Received corrupted text")
+            case .networkFailure:
+                Text("Network failure")
+            }
+            
+        }.onAppear(perform: {
+            self.startOpenAIService()
+        })
+    }
+}
+```
