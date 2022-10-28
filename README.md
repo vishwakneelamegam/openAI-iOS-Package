@@ -26,7 +26,7 @@ Used to access openAI completions service.
 - https://github.com/vishwakneelamegam/openAI-iOS-Package
 
 ## The package uses
-- Alamofire
+- Alamofire - https://github.com/Alamofire/Alamofire
 
 ## Sample code
 
