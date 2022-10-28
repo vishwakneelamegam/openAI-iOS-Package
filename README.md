@@ -25,7 +25,7 @@ Used to access openAI completions service.
 ## Package manager link
 - https://github.com/vishwakneelamegam/openAI-iOS-Package
 
-## Package dependencies
+## The package uses
 - Alamofire
 
 ## Sample code
