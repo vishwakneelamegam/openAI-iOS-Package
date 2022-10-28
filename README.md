@@ -22,6 +22,9 @@ Used to access openAI completions service.
 - Temperture - 0
 - Max Tokens - 100
 
+## Package manager link
+- https://github.com/vishwakneelamegam/openAI-iOS-Package
+
 ## Package dependencies
 - Alamofire
 
