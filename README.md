@@ -34,7 +34,7 @@ import openAILibrary
 struct mainUI: View {
     @StateObject var openAIObj = openAIService()
     private func startOpenAIService(){
-        self.openAIObj.openAIApiKey = "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"
+        self.openAIObj.openAIApiKey = "<provide-your-API-key-here>"
         self.openAIObj.request(prompt: self.openAIObj.makePrompt(data: [
             "Correct this to standard english",
             "She no went to the market"
