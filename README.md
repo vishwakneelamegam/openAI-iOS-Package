@@ -26,28 +26,26 @@ import SwiftUI
 import openAILibrary
 
 struct mainUI: View {
-    @StateObject var openAIObj = openAIService()
+    var openAIObj = openAIService(apiKey: "<provide-your-api-key-here>")
+    @State var showResponse : String = ""
     private func startOpenAIService(){
-        self.openAIObj.openAIApiKey = "<provide-your-API-key-here>"
         self.openAIObj.request(prompt: self.openAIObj.makePrompt(data: [
             "Correct this to standard english",
             "She no went to the market"
-        ]))
+        ])) { response, text in
+            switch(response){
+            case .receivedCorruptedData:
+                self.showResponse = "corrupted data"
+            case .receivedUncorruptedData:
+                self.showResponse = text
+            case .networkFailure:
+                self.showResponse = "network failure"
+            }
+        }
     }
     var body: some View {
         VStack{
-            switch(self.openAIObj.status){
-            case .startService:
-                Text("Start service")
-            case .receivedResponse:
-                Text("Received response")
-            case .receivedUncorruptedData:
-                Text(self.openAIObj.responseText)
-            case .receivedCorruptedData:
-                Text("Received corrupted text")
-            case .networkFailure:
-                Text("Network failure")
-            }
+            Text(self.showResponse)
             
         }.onAppear(perform: {
             self.startOpenAIService()
