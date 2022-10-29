@@ -4,7 +4,7 @@ Used to access openAI service.
 
 ## Requirement
 
-- Provide api key to the variable openAIApiKey(Get your api key from https://beta.openai.com/account/api-keys).
+- Provide api key.
 - Before requesting, you have to provide prompt as input(The prompt can be created using the function makePrompt).
 
 ## Open AI defined parameters
