@@ -2,8 +2,6 @@ import Foundation
 import Alamofire
 
 public enum response{
-    case startService
-    case receivedResponse
     case receivedUncorruptedData
     case receivedCorruptedData
     case networkFailure
@@ -17,21 +15,12 @@ public struct openAIStaticData{
     static let openApiMaxTokens : Int = 100
 }
 
-@available(iOS 13.0, *)
-@available(macOS 10.15, *)
-public class openAIService : ObservableObject{
+public class openAIService{
     
-    @Published public var status = response.startService
-    @Published public var responseText : String = ""
-    @Published public var openAIApiKey : String = ""
+    private var openAIApiKey : String = ""
     
-    public init(){
-        self.flush()
-    }
-    
-    private func flush(){
-        self.status = response.startService
-        self.responseText = ""
+    public init(apiKey : String){
+        self.openAIApiKey = apiKey
     }
     
     private func makeApiKey() -> String{
@@ -57,7 +46,7 @@ public class openAIService : ObservableObject{
     
     public func makePrompt(data : [String]) -> String{
         if data.count == 0{
-            return "Say, Empty array"
+            return "Say, No input"
         }
         if data.count > 0{
             var checkArray = [String]()
@@ -67,61 +56,53 @@ public class openAIService : ObservableObject{
                 }
             }
             if checkArray.count == 0{
-                return "Say, Empty array"
+                return "Say, No input"
             }
             return checkArray.joined(separator: "\n\n")
         }
-        return "Say, Empty array"
+        return "Say, No input"
     }
     
-    private func checkResponseAndGetTextData(data : Data){
+    private func checkResponseAndGetTextData(data : Data) -> (response, String){
         do{
             guard let responseDictionary = try JSONSerialization.jsonObject(with: data,options: .allowFragments) as? [String : Any] else{
-                self.status = .receivedCorruptedData
-                return
+                return (.receivedCorruptedData, "")
             }
             if (responseDictionary.keys.contains("choices")){
                 guard let choiceArray = responseDictionary["choices"] as? [Any] else{
-                    self.status = .receivedCorruptedData
-                    return
+                    return (.receivedCorruptedData, "")
                 }
                 if !choiceArray.isEmpty{
                     guard let firstChoice = choiceArray[0] as? [String : Any] else{
-                        self.status = .receivedCorruptedData
-                        return
+                        return (.receivedCorruptedData, "")
                     }
                     if firstChoice.keys.contains("text"){
                         guard let text  = firstChoice["text"] as? String else{
-                            self.status = .receivedCorruptedData
-                            return
+                            return (.receivedCorruptedData, "")
                         }
-                        self.status = .receivedUncorruptedData
                         let cleanText = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-                        self.responseText = cleanText
-                        return
+                        return (.receivedUncorruptedData, cleanText)
                     }
-                    return
+                    return (.receivedCorruptedData, "")
                 }
             }
-            return
+            return (.receivedCorruptedData, "")
         }
         catch{
-            self.status = .receivedCorruptedData
-            return
+            return (.receivedCorruptedData, "")
         }
         
     }
     
-    public func request(prompt : String){
-        self.flush()
+    public func request(prompt : String, completion : @escaping (response, String) -> Void){
         AF.request(openAIStaticData.openApiLink,method: .post,parameters: self.makeParameter(prompt: prompt), encoding: JSONEncoding.default, headers: self.makeHeader()).validate(statusCode: 200..<299).responseData(completionHandler: {
             response in
             switch response.result{
             case .success(let data):
-                self.status = .receivedResponse
-                self.checkResponseAndGetTextData(data: data)
+                let result : (response, String) = self.checkResponseAndGetTextData(data: data)
+                completion(result.0, result.1)
             case .failure(_):
-                self.status = .networkFailure
+                completion(.networkFailure, "")
             }
         })
     }
